@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Học tiếng Hàn</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: -1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+    }
+
+    header img {
+      height: 40px;
+      margin-right: 10px;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    header .info-btn {
+      margin-left: auto;
+      margin-right: 40px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    header .info-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 80px;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 700px;
+      width: 90%;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .korean-sentence {
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #viet-sentence {
+      font-size: 22px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      margin: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .result-box {
+      background: #f1f3f5;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    #score-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #dee2e6;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+
+    #score-fill {
+      height: 100%;
+      background-color: #28a745;
+      width: 0%;
+      border-radius: 10px;
+    }
+
+    .highlight-wrong {
+      color: red;
+      font-weight: bold;
+    }
+
+    audio {
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f1f1f1;
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      text-align: left;
+      position: relative;
+    }
+
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo">
+    <h1>Học tiếng Hàn</h1>
+    <button class="info-btn" onclick="explainFunction()">ℹ️ Giải thích chức năng</button>
+  </header>
+
+  <div class="main">
+    <div class="container">
+      <h2>Học tiếng Hàn</h2>
+      <p>Hãy đọc to các câu dưới đây về việc học tiếng Hàn của công nhân Việt Nam tại cảng đóng tàu:</p>
+      <div class="korean-sentence" id="sentence">지금 용접 작업 시작하세요.</div>
+      <div class="korean-sentence" id="viet-sentence">Bắt đầu công việc hàn ngay bây giờ.</div>
+      <button class="btn" onclick="speakKorean()">🔊 Nghe phát âm</button>
+      <button class="btn" onclick="recordAudio()">🎤 Phát âm & Đánh giá</button>
+      <button class="btn" onclick="nextSentence()">➡️ Câu tiếp theo</button>
+
+      <div class="result-box" id="result-box" style="display:none;">
+        <div><strong>Phân tích phát âm:</strong></div>
+        <div id="comparison"></div>
+        <div id="score-bar"><div id="score-fill"></div></div>
+        <div><strong>Điểm phát âm:</strong> <span id="score">0%</span></div>
+        <audio id="audio-player" controls></audio>
+        <a id="download-link" class="btn" style="display:none;" download="recording.webm">📥 Tải âm thanh</a>
+      </div>
+
+      <table id="record-table" style="display:none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Câu</th>
+            <th>Phát âm</th>
+            <th>Điểm (%)</th>
+          </tr>
+        </thead>
+        <tbody id="record-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="popup" class="popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup()">✖</button>
+      <p id="popup-text"></p>
+    </div>
+  </div>
+
+  <script>
+    const sentences = [
+      { kr: "지금 용접 작업 시작하세요.", vi: "Bắt đầu công việc hàn ngay bây giờ." },
+      { kr: "이 철판을 절단해 주세요.", vi: "Hãy cắt tấm thép này." },
+      { kr: "그라인더로 표면을 갈아 주세요.", vi: "Hãy mài bề mặt bằng máy mài." },
+      { kr: "도면을 보고 작업하세요.", vi: "Hãy làm việc theo bản vẽ." },
+      { kr: "안전모 꼭 착용하세요.", vi: "Hãy đội mũ bảo hộ." },
+      { kr: "현장에서는 안전화를 신어야 합니다.", vi: "Tại công trường phải mang giày bảo hộ." },
+      { kr: "장갑 없이 작업하지 마세요.", vi: "Không được làm việc nếu không đeo găng tay." },
+      { kr: "여기 추락주의! 조심하세요.", vi: "Cẩn thận rơi xuống ở đây!" },
+      { kr: "화기작업 전에 허가 받으세요.", vi: "Hãy xin phép trước khi làm việc có lửa." },
+      { kr: "산소절단기로 자르세요.", vi: "Hãy cắt bằng máy cắt oxy." }
+    ];
+
+    let index = 0;
+    let mediaRecorder;
+    let audioChunks = [];
+    let recordCount = 0;
+
+    function speakKorean() {
+      const utterance = new SpeechSynthesisUtterance(sentences[index].kr);
+      utterance.lang = 'ko-KR';
+      speechSynthesis.speak(utterance);
+    }
+
+    function nextSentence() {
+      index = (index + 1) % sentences.length;
+      document.getElementById("sentence").innerText = sentences[index].kr;
+      document.getElementById("viet-sentence").innerText = sentences[index].vi;
+      document.getElementById("result-box").style.display = "none";
+    }
+
+    async function recordAudio() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'ko-KR';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+      mediaRecorder.start();
+
+      recognition.onresult = async (event) => {
+        const spokenText = event.results[0][0].transcript;
+        const expectedText = sentences[index].kr;
+        mediaRecorder.stop();
+
+        const score = levenshteinScore(expectedText, spokenText);
+        const comparisonHTML = highlightDifferences(expectedText, spokenText);
+
+        document.getElementById("comparison").innerHTML = comparisonHTML;
+        document.getElementById("score").innerText = score + "%";
+        document.getElementById("score-fill").style.width = score + "%";
+        document.getElementById("result-box").style.display = "block";
+
+        recordCount++;
+        const row = `<tr><td>${recordCount}</td><td>${expectedText}</td><td>${spokenText}</td><td>${score}</td></tr>`;
+        document.getElementById("record-body").insertAdjacentHTML("beforeend", row);
+        document.getElementById("record-table").style.display = "table";
+      };
+
+      mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioURL = URL.createObjectURL(audioBlob);
+        document.getElementById("audio-player").src = audioURL;
+        const downloadLink = document.getElementById("download-link");
+        downloadLink.href = audioURL;
+        downloadLink.style.display = "inline-block";
+      };
+    }
+
+    function levenshteinScore(a, b) {
+      const matrix = [];
+      const lenA = a.length;
+      const lenB = b.length;
+
+      for (let i = 0; i <= lenB; i++) matrix[i] = [i];
+      for (let j = 0; j <= lenA; j++) matrix[0][j] = j;
+
+      for (let i = 1; i <= lenB; i++) {
+        for (let j = 1; j <= lenA; j++) {
+          if (b[i - 1] === a[j - 1]) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j - 1] + 1
+            );
+          }
+        }
+      }
+
+      const distance = matrix[lenB][lenA];
+      return Math.max(0, Math.round((1 - distance / lenA) * 100));
+    }
+
+    function highlightDifferences(expected, spoken) {
+      let result = "";
+      const minLen = Math.min(expected.length, spoken.length);
+      for (let i = 0; i < minLen; i++) {
+        result += (expected[i] === spoken[i])
+          ? expected[i]
+          : `<span class="highlight-wrong">${spoken[i]}</span>`;
+      }
+      if (spoken.length > expected.length) {
+        result += `<span class="highlight-wrong">${spoken.slice(expected.length)}</span>`;
+      }
+      return `<p><strong>Bạn đã đọc:</strong> ${result}</p>`;
+    }
+
+    function explainFunction() {
+      const explanationHTML = "Chức năng các nút:<br><br>" +
+        "🔊 <strong>Nghe phát âm</strong>: Phát âm câu tiếng Hàn bằng giọng nói của hệ thống.<br>" +
+        "🎤 <strong>Phát âm và Đánh giá</strong>: Ghi âm giọng nói của bạn và so sánh với câu chuẩn để tính điểm phát âm.<br>" +
+        "➡️ <strong>Câu tiếp theo</strong>: Chuyển sang câu tiếng Hàn tiếp theo.<br>" +
+        "ℹ️ <strong>Giải thích chức năng</strong>: Đọc to thông tin giải thích về các chức năng của trang bằng tiếng Việt.";
+
+      const explanationSpeech = "Chức năng các nút: " +
+        "Nghe phát âm: Phát âm câu tiếng Hàn bằng giọng nói của hệ thống. " +
+        "Phát âm và Đánh giá: Ghi âm giọng nói của bạn và so sánh với câu chuẩn để tính điểm phát âm. " +
+        "Câu tiếp theo: Chuyển sang câu tiếng Hàn tiếp theo. " +
+        "Giải thích chức năng: Đọc to thông tin giải thích về các chức năng của trang bằng tiếng Việt.";
+
+      document.getElementById("popup-text").innerHTML = explanationHTML;
+      document.getElementById("popup").style.display = "flex";
+
+      const utterance = new SpeechSynthesisUtterance(explanationSpeech);
+      utterance.lang = 'vi-VN';
+      speechSynthesis.speak(utterance);
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    // 첫 문장 표시
+    window.onload = () => {
+      document.getElementById("sentence").innerText = sentences[0].kr;
+      document.getElementById("viet-sentence").innerText = sentences[0].vi;
+    };
+  </script>
+</body>
+</html>
